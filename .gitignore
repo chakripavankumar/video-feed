@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.DS_Store
+
+test.js
+.vscode/*
+
+.idea
+
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
