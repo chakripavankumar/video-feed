@@ -65,7 +65,7 @@ async function logOutUser(req, res) {
 
 async function registerFoodPartner(req, res) {
   const { name, email, password } = req.body;
-
+  
   const isAccountExist = await foodPartnerModel.findOne({ email });
 
   if (isAccountExist) {
