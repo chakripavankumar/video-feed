@@ -1,4 +1,5 @@
 const userModel = require("../model/user.model");
+const foodPartnerModel = require("../model/foodpartner.model");
 const bycrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -62,4 +63,72 @@ async function logOutUser(req, res) {
   });
 }
 
-module.exports = { registerUser, loginUser, logOutUser };
+async function registerFoodPartner(req, res) {
+  const { name, email, password } = req.body;
+
+  const isAccountExist = await foodPartnerModel.findOne({ email });
+
+  if (isAccountExist) {
+    return res.status(400).json({ message: "Food partner already exists" });
+  }
+  const hashedPassword = await bycrypt.hash(password, 10);
+  const foodpartner = await foodPartnerModel.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
+  const token = jwt.sign({ id: foodpartner._id }, process.env.JWT_SECRET);
+  res.cookie("token", token);
+  await foodpartner.save();
+  res.status(201).json({
+    message: "Food partner registered successfully",
+    foodpartner: {
+      _id: foodpartner._id,
+      name: foodpartner.name,
+      email: foodpartner.email,
+      phone: foodpartner.phone,
+    },
+  });
+}
+
+async function loginFoodPartner(req, res) {
+  const { email, password } = req.body;
+  const foodpartner = await foodPartnerModel.findOne({ email });
+  if (!foodpartner) {
+    return res.status(400).json({ message: "Invalid email or phone number" });
+  }
+  const isPaasswordvalid = await bycrypt.compare(
+    password,
+    foodpartner.password
+  );
+  if (!isPaasswordvalid) {
+    return res.status(400).json({ message: "Invalid password" });
+  }
+  const token = jwt.sign({ id: foodpartner._id }, process.env.JWT_SECRET);
+  res.cookie("token", token);
+  res.status(200).json({
+    message: "Food partner logged in successfully",
+    foodpartner: {
+      _id: foodpartner._id,
+      name: foodpartner.name,
+      email: foodpartner.email,
+      phone: foodpartner.phone,
+    },
+  });
+}
+
+function logoutFoodPartner(req, res) {
+  res.clearCookie("token");
+  res.status(200).json({
+    message: "Food partner logged out successfully",
+  });
+}
+
+module.exports = {
+  registerUser,
+  loginUser,
+  logOutUser,
+  registerFoodPartner,
+  loginFoodPartner,
+  logoutFoodPartner,
+};
