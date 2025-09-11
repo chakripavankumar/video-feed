@@ -1,4 +1,6 @@
 const foodModel = require("../model/food.modal");
+const storageService = require("../services/storage.service");
+const { v4: uuid } = require("uuid");
 
 async function createFood(req, res) {
   console.log("test");
@@ -6,6 +8,9 @@ async function createFood(req, res) {
   console.log(req.body);
 
   console.log(req.file);
+
+  const fileUpload = await storageService.uploadFile(req.file.buffer, uuid());
+  console.log(fileUpload);
 
   res.status(201).json({ message: "Food created successfully" });
 }
